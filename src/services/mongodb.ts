@@ -45,46 +45,46 @@ async function apiCall(method: string, endpoint: string, data?: any) {
 // Products
 export const mongodbProducts = {
   getAll: () => apiCall("GET", "/products"),
-  getById: (id: string) => apiCall("GET", `/products/${id}`),
+  getById: (id: string) => apiCall("GET", `/products?id=${id}`),
   create: (data: any) => apiCall("POST", "/products", data),
-  update: (id: string, data: any) => apiCall("PUT", `/products/${id}`, data),
-  delete: (id: string) => apiCall("DELETE", `/products/${id}`),
+  update: (id: string, data: any) => apiCall("PUT", `/products?id=${id}`, data),
+  delete: (id: string) => apiCall("DELETE", `/products?id=${id}`),
 };
 
 // Categories
 export const mongodbCategories = {
   getAll: () => apiCall("GET", "/categories"),
   create: (data: any) => apiCall("POST", "/categories", data),
-  update: (id: string, data: any) => apiCall("PUT", `/categories/${id}`, data),
-  delete: (id: string) => apiCall("DELETE", `/categories/${id}`),
+  update: (id: string, data: any) => apiCall("PUT", `/categories?id=${id}`, data),
+  delete: (id: string) => apiCall("DELETE", `/categories?id=${id}`),
 };
 
 // Subcategories
 export const mongodbSubcategories = {
   getAll: () => apiCall("GET", "/subcategories"),
   create: (data: any) => apiCall("POST", "/subcategories", data),
-  delete: (id: string) => apiCall("DELETE", `/subcategories/${id}`),
+  delete: (id: string) => apiCall("DELETE", `/subcategories?id=${id}`),
 };
 
 // Orders
 export const mongodbOrders = {
   getAll: () => apiCall("GET", "/orders"),
-  getById: (id: string) => apiCall("GET", `/orders/${id}`),
+  getById: (id: string) => apiCall("GET", `/orders?id=${id}`),
   create: (data: any) => apiCall("POST", "/orders", data),
-  update: (id: string, data: any) => apiCall("PUT", `/orders/${id}`, data),
+  update: (id: string, data: any) => apiCall("PUT", `/orders?id=${id}`, data),
 };
 
 // Customers
 export const mongodbCustomers = {
   getAll: () => apiCall("GET", "/customers"),
-  getById: (id: string) => apiCall("GET", `/customers/${id}`),
+  getById: (id: string) => apiCall("GET", `/customers?id=${id}`),
 };
 
 // Reviews
 export const mongodbReviews = {
   getAll: () => apiCall("GET", "/reviews"),
   create: (data: any) => apiCall("POST", "/reviews", data),
-  delete: (id: string) => apiCall("DELETE", `/reviews/${id}`),
+  delete: (id: string) => apiCall("DELETE", `/reviews?id=${id}`),
 };
 
 // Unified API export
