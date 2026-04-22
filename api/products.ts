@@ -17,13 +17,14 @@ async function connectDB() {
 }
 
 export default async (req: VercelRequest, res: VercelResponse) => {
-  // CORS headers
+  // CORS headers - allow all methods
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
   res.setHeader('Content-Type', 'application/json');
 
+  // Handle preflight requests
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
@@ -43,31 +44,40 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     await mongoClient.connect();
     const db = mongoClient.db(DATABASE_NAME);
     const productsCollection = db.collection('products');
+    
+    // Extract ID from either URL path or query string
+    const id = (req.query.id as string) || req.url?.split('/').pop();
 
     if (req.method === 'GET') {
       const products = await productsCollection.find({}).toArray();
-      res.status(200).json(products);
+      return res.status(200).json(products);
     } else if (req.method === 'POST') {
-      const result = await productsCollection.insertOne(req.body);
-      res.status(201).json(result);
+      const product = {
+        ...req.body,
+        _id: req.body._id || `prod_${Date.now()}`,
+        created_at: new Date()
+      };
+      const result = await productsCollection.insertOne(product);
+      return res.status(200).json({ _id: result.insertedId, ...product });
     } else if (req.method === 'PUT') {
-      const productId = req.query.id as string;
+      if (!id) return res.status(400).json({ error: 'ID is required' });
       const result = await productsCollection.updateOne(
-        { _id: productId } as any,
+        { _id: id } as any,
         { $set: req.body }
       );
       if (result.matchedCount === 0) return res.status(404).json({ error: 'Product not found' });
-      res.status(200).json({ success: true });
+      return res.status(200).json({ success: true });
     } else if (req.method === 'DELETE') {
-      const productId = req.query.id as string;
-      const result = await productsCollection.deleteOne({ _id: productId } as any);
+      if (!id) return res.status(400).json({ error: 'ID is required' });
+      console.log('[v0] Deleting product with ID:', id);
+      const result = await productsCollection.deleteOne({ _id: id } as any);
       if (result.deletedCount === 0) return res.status(404).json({ error: 'Product not found' });
-      res.status(200).json({ success: true });
+      return res.status(200).json({ success: true });
     } else {
-      res.status(405).json({ error: 'Method not allowed' });
+      return res.status(405).json({ error: 'Method not allowed' });
     }
   } catch (error) {
-    console.error('Products API error:', error);
+    console.error('[v0] Products API error:', error);
     res.status(500).json({ 
       error: 'Internal server error', 
       message: error instanceof Error ? error.message : 'Unknown error' 
