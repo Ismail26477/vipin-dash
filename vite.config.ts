@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => ({
         secure: false,
       },
     },
+    middlewareMode: true,
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
