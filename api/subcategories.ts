@@ -18,12 +18,14 @@ async function connectDB() {
 }
 
 export default async (req: VercelRequest, res: VercelResponse) => {
+  // CORS headers - allow all methods
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
   res.setHeader('Content-Type', 'application/json');
 
+  // Handle preflight requests
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
@@ -43,6 +45,9 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
     const db = mongoClient.db(DATABASE_NAME);
     const subcategoriesCollection = db.collection('subcategories');
+    
+    // Extract ID from either URL path or query string
+    const id = (req.query.id as string) || req.url?.split('/').pop();
 
     if (req.method === 'GET') {
       const subcategories = await subcategoriesCollection.find({}).toArray();
@@ -60,14 +65,16 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     }
 
     if (req.method === 'DELETE') {
-      const result = await subcategoriesCollection.deleteOne({ _id: req.query.id } as any);
+      if (!id) return res.status(400).json({ error: 'ID is required' });
+      console.log('[v0] Deleting subcategory with ID:', id);
+      const result = await subcategoriesCollection.deleteOne({ _id: id } as any);
       if (result.deletedCount === 0) return res.status(404).json({ error: 'Subcategory not found' });
       return res.status(200).json({ success: true });
     }
 
-    res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Method not allowed' });
   } catch (error: any) {
-    console.error('Subcategories API error:', error);
+    console.error('[v0] Subcategories API error:', error);
     res.status(500).json({ error: error.message || 'Internal server error' });
   } finally {
     if (mongoClient) {
