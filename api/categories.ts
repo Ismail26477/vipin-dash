@@ -4,6 +4,14 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 const MONGODB_URI = process.env.MONGODB_URI;
 const DATABASE_NAME = process.env.MONGODB_DB_NAME || 'trolley';
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb',
+    },
+  },
+};
+
 async function connectDB() {
   if (!MONGODB_URI) {
     throw new Error('MONGODB_URI environment variable is not set');
