@@ -4,6 +4,15 @@ import { MongoClient } from 'mongodb';
 const MONGODB_URI = process.env.MONGODB_URI;
 const DATABASE_NAME = process.env.MONGODB_DB_NAME || 'trolley';
 
+// Increase payload size limit by adding to the request
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb',
+    },
+  },
+};
+
 async function connectDB() {
   if (!MONGODB_URI) {
     throw new Error('MONGODB_URI environment variable is not set');
